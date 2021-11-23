@@ -1,6 +1,6 @@
 import gulp from "gulp";
-import gpug from "gulp-pug";
 import del from "del";
+import gejs from "gulp-ejs";
 import ws from "gulp-webserver";
 import image from "gulp-image";
 import gulpSass from "gulp-sass";
@@ -10,13 +10,14 @@ import miniCSS from "gulp-csso";
 import bro from "gulp-bro";
 import babelify from "babelify";
 import ghPages from "gulp-gh-pages";
+import rename from "gulp-rename";
 
 const sass = gulpSass(sass1);
 
 const routes = {
-  pug: {
-    watch: "src/**/*.pug",
-    src: "src/*.pug",
+  ejs: {
+    watch: "src/**/*.ejs",
+    src: "src/*.ejs",
     dest: "build",
   },
   img: {
@@ -35,8 +36,12 @@ const routes = {
   },
 };
 
-const pug = () => {
-  return gulp.src(routes.pug.src).pipe(gpug()).pipe(gulp.dest(routes.pug.dest));
+const ejs = () => {
+  return gulp
+    .src(routes.ejs.src)
+    .pipe(gejs())
+    .pipe(rename({ extname: ".html" }))
+    .pipe(gulp.dest(routes.ejs.dest));
 };
 
 const clean = () => {
@@ -82,7 +87,7 @@ const ghdeploy = () => {
 };
 
 const watch = () => {
-  gulp.watch(routes.pug.watch, pug);
+  gulp.watch(routes.ejs.watch, ejs);
   gulp.watch(routes.img.src, img);
   gulp.watch(routes.scss.watch, styles);
   gulp.watch(routes.js.watch, js);
@@ -90,7 +95,7 @@ const watch = () => {
 
 const prepare = gulp.series([clean, img]);
 
-const assets = gulp.series([pug, styles, js]);
+const assets = gulp.series([ejs, styles, js]);
 
 const postDev = gulp.parallel([webserver, watch]);
 
